@@ -1,6 +1,13 @@
+### Application name : CA1 B9DA101 - Statistics for Data Analytics
+### Course : MSc (Data Analytics) - Sep 2019 - Group C 
+### Developed by : Rahul Jain(10533047) / Viraj Kamdar(10527201) / Vaibhav Shah(10532808) / Jayesh Aswar(10531366)
+### College : Dublin Business School 
+### URL : https://jainrahul.shinyapps.io/ShinyApp/
+
+
 library(shiny)
 library(shinythemes)
-
+library(shinyjs)
 
 ui = fluidPage(
   #shinythemes::themeSelector(),
@@ -10,15 +17,21 @@ ui = fluidPage(
     "Statistics",
     tabPanel(icon = icon("fas fa-bars"),"Dashboard",
              div(id="SidebarpanelD",sidebarPanel(
+               ###<<< Begin   <<< Vaibhav Shah(10532808) <<<
                selectInput("fileType", "Data Source",
                            choices = c("Select" = "Select","Built-IN" = "builtin",
-                                       "Uplofad" = "upload",
+                                       "Upload" = "upload",
                                        "URL" = "url")
+               ###<<< END   <<< Vaibhav Shah(10532808) <<<
                ),
+               ###<<< Begin   <<< Rahul Jain(10533047) <<<
                conditionalPanel(
                  condition = "input.fileType == 'builtin'",
                  selectInput(inputId = "builtIn", label = "Built In data set", choices = ls("package:datasets"),selected = "cars"),
                ),
+               ###<<< End   <<< Rahul Jain(10533047) <<<
+               
+               ###<<< Begin   <<< Jayesh Aswar(10531366) <<<
                # Input: Select a file
                conditionalPanel(
                  condition = "input.fileType == 'upload'",
@@ -28,11 +41,17 @@ ui = fluidPage(
                                       "text/comma-separated-values,text/plain",
                                       ".csv"))
                ),
+               ###<<< End   <<< Jayesh Aswar(10531366) <<<
+               
+               ###<<< Begin   <<< Rahul Jain(10533047) <<<
                #Read from url
                conditionalPanel(
                  condition = "input.fileType == 'url'",
                  textInput(inputId = "urlpath", label = "Enter URL to csv", value="https://people.sc.fsu.edu/~jburkardt/data/csv/cities.csv")
                ),
+               ###<<< End   <<< Rahul Jain(10533047) <<<
+               
+               ###<<< Begin   <<< Viraj Kamdar(10527201) <<<
                conditionalPanel(
                  condition = "input.fileType == 'upload'",
                  textInput(inputId='separator', label='File Separator',value=",")
@@ -52,6 +71,9 @@ ui = fluidPage(
                                        "Hypothesis 2" = "hypothesis.2"),
                            selected = "exponential"
                ),
+               ###<<< End   <<< Viraj Kamdar(10527201) <<<
+               
+               ###<<< Begin   <<< Rahul Jain(10533047) <<<
                conditionalPanel(
                  condition = "input.conmodel == 'hypothesis'",
                  numericInput("mu","Mean of Population",value=5),
@@ -60,22 +82,30 @@ ui = fluidPage(
                               inline=TRUE),
                  radioButtons("alternative","Alternative", choices = c("Lower Tailed" = "less", "Upper Tailed" = "greater","Two-tailed" = "two.sided"), inline=TRUE)
                ),
+               ###<<< End   <<< Rahul Jain(10533047) <<<
+               
+               
+               ###<<< Begin   <<< Jayesh Aswar(10531366) <<<
                conditionalPanel(
                  condition = "input.conmodel == 'hypothesis.2'",
                  radioButtons("alpha.2","Significance Level", choices = c("0.025" = "0.025", "0.05" = "0.05","0.01" = "0.01"), inline=TRUE),
                  radioButtons("alternative.2","Alternative", choices = c("Lower Tailed" = "less", "Upper Tailed" = "greater","Two-tailed" = "two.sided"), inline=TRUE)
                )
              )),
+             ###<<< End   <<< Jayesh Aswar(10531366) <<<
+             
+              ###<<< Begin   <<< Vaibhav Shah(10532808) <<<
              mainPanel(
                actionButton("toggleSidebarD", "Toggle"),
                h1(),
                navbarPage("Dashboard",
                  tabPanel("View", wellPanel(DT::dataTableOutput('extdata')),style="color:#000000"),
                  tabPanel("Summary",
-                          h1("Summary Statistics",style="color:teal"),
+                          h1("Descriptive Analytics",style="color:teal"),
                           verbatimTextOutput("sum"),
                           h1("Box Plot",style="color:teal"),
-                          wellPanel(plotOutput("box"))),
+                          wellPanel(plotOutput("box"))
+                          ),
                  tabPanel(title = uiOutput("title_panel"),
                           h1("Prediction",style="color:teal"),
                           h1(verbatimTextOutput('prob')),
@@ -85,6 +115,9 @@ ui = fluidPage(
                )
              )
     ),
+            ###<<< End   <<< Vaibhav Shah(10532808) <<<
+    
+    ###<<< Begin   <<< Viraj Kamdar(10527201) <<<
     tabPanel(icon = icon("fas fa-chart-line"),"GLM", 
              sidebarPanel(
                selectInput("ds", "Data Source :",
@@ -125,6 +158,9 @@ ui = fluidPage(
                )
              )
     ),
+              ###<<< End   <<< Viraj Kamdar(10527201) <<<
+    
+               ###<<< Begin   <<< Rahul Jain(10533047) <<<
     tabPanel("YAHOO!", icon = icon("fas fa-yahoo"),
              div(id="Sidebar",sidebarPanel(
                textInput(inputId = "ticker", label = "Enter TICKER", value = "GOOGL"),
@@ -143,6 +179,10 @@ ui = fluidPage(
                         wellPanel(plotOutput("yahooLine")))
              )
     ),
+              ###<<< End   <<< Rahul Jain(10533047) <<<
+       
+             ###<<< Begin   <<< Vaibhav Shah (10532808) <<<
+    
     tabPanel("About Us",icon = icon("fas fa-users"),
              mainPanel(
                tabPanel("ABOUT US", 
@@ -152,11 +192,14 @@ ui = fluidPage(
                                    tableOutput('aboutUs')
                             )
                           )
-                        )
-                        
+                        ),
+                       h1("https://github.com/jainrahulh/statistics-with-r",style="color:#000") 
                )
              )
     )
+            ###<<< End   <<< Vaibhav Shah (10532808) <<<  
+    
+            ###<<< Begin   <<< Jayesh Aswar(10531366) <<<
   ),tags$style(type = 'text/css', '.navbar {
                            font-family: Lucida Console;
                            font-size: 15px;
@@ -184,5 +227,5 @@ ui = fluidPage(
                color: #fff;}'
   )
 )
-
+            ###<<< End   <<< Jayesh Aswar(10531366) <<<
 
