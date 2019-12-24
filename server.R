@@ -2,7 +2,7 @@
 ### Course : MSc (Data Analytics) - Sep 2019 - Group C 
 ### Developed by : Rahul Jain(10533047) / Viraj Kamdar(10527201) / Vaibhav Shah(10532808) / Jayesh Aswar(10531366)
 ### College : Dublin Business School 
-### URL : <<Published URL >>
+### URL : https://jainrahul.shinyapps.io/ShinyApp/
 
 #install.packages("pastecs")
 library(shiny)
@@ -103,6 +103,8 @@ shinyServer(
     })
     ###<<< End   <<< Rahul Jain(10533047) <<<
     
+    ###<<< Begin   <<< Viraj Kamdar(10527201) <<<
+    
     #Observe function to populate select box with column names if data source changes
     observe({
       updateSelectInput(session, "columns",
@@ -144,7 +146,10 @@ shinyServer(
       if (input$conmodel == 'uniform') {
         print(paste('Predicted Value :',mean(runif(input$s,1/mean(x)))))
       }
+    
+      ###<<< End   <<< Viraj Kamdar(10527201) <<<
       
+        
       ###<<< Begin   <<< Rahul Jain(10533047) <<<
       #Hypothesis Test for One population
       if (input$conmodel == 'hypothesis') {
@@ -160,6 +165,8 @@ shinyServer(
         print(t)
       }
       ###<<< End   <<< Rahul Jain(10533047) <<<
+      
+      ###<<< Begin   <<< Vaibhav Shah(10532808) <<<
       
       #Hypothesis Test for Two population
       if (input$conmodel == 'hypothesis.2') {
@@ -184,6 +191,9 @@ shinyServer(
       print(typeof(x))
       hist(x, xlab = input$columns, main = paste("Histogram of" , input$columns), col = c("orange", "red", "gray", "green"))
     })
+    
+    ###<<< End   <<< Vaibhav Shah(10532808) <<<
+    
     
     ###<<< Begin   <<< Rahul Jain(10533047) <<<
     #Scatterplot
@@ -224,6 +234,8 @@ shinyServer(
     })
     ###<<< End   <<< Rahul Jain(10533047) <<<
     
+   ###<<< Begin   <<< Viraj Kamdar(10527201) <<<
+    
     #Boxplot to understand outliers
     output$box <- renderPlot({
       par(mfrow = c(1,1))
@@ -231,6 +243,12 @@ shinyServer(
       boxplot(x,col="darkseagreen",border="black")
     })
     
+    
+    output$dbscan <- renderPlot({
+      par(mfrow = c(1,1))
+      x<-myData()
+      boxplot(x,col="darkseagreen",border="black")
+    })
     
     #Dynamic Tab name change based on select box
     output$title_panel = renderText({
@@ -252,9 +270,12 @@ shinyServer(
     })
     
     
-    
+    ###<<< End   <<< Viraj Kamdar(10527201) <<<
     
     #################################Start of GLM CODE#################################
+    
+    ###<<< Begin   <<< Jayesh Aswar (10531366) <<<
+    
     RMSE <- 0
     values <- reactiveValues()
     glmData <- reactive({
@@ -298,7 +319,11 @@ shinyServer(
       colnames(TarIndData) = c(input$tarvar,input$indvar)
       summary(TarIndData)
     })
-    ###############################
+    
+    ###<<< End   <<< Jayesh Aswar (10531366) <<<  
+    
+    ###<<< Begin   <<< Viraj Kamdar (10527201) <<<
+    
     myColors <- reactive({
       df <- na.omit(glmData())
       TarIndData <- cbind(df[,input$tarvar],df[,input$indvar])
@@ -384,6 +409,10 @@ shinyServer(
         )
     })
     
+     ###<<< End   <<< Viraj Kamdar (10527201) <<<
+    
+    
+    ###<<< Begin   <<< Vaibhav Shah (10532808) <<<
     
     output$selData <- DT::renderDataTable({
       
@@ -447,7 +476,11 @@ shinyServer(
       DT::datatable(forecast_out(), options = list(lengthChange = TRUE))
     })
     
+    ###<<< End   <<< Vaibhav Shah(10532808) <<<
+    
     #################################End of GLM CODE#################################
+    
+    ###<<< Begin   <<< Jayesh Aswar (10531366) <<<
     
     output$aboutUs <- renderTable({
       smoke <- matrix(c(1,"Rahul Jain",10533047,3,"Viraj Kamdar",10527201,3,"Vaibhav Shah",10532808,4,"Jayesh Aswar",10531366),ncol=3, byrow=TRUE)
@@ -456,3 +489,4 @@ shinyServer(
     })
   } 
 )
+    ###<<< End   <<< Jayesh Aswar (10531366) <<<
