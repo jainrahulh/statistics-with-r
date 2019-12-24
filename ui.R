@@ -2,22 +2,22 @@ library(shiny)
 library(shinythemes)
 
 
-ui = tagList(
-  shinythemes::themeSelector(),
+ui = fluidPage(
+  #shinythemes::themeSelector(),
+  theme = shinytheme('paper'),
+  useShinyjs(),
   navbarPage(
-    #theme = "cerulean",  # <--- To use a theme, uncomment this
-    "CA ONE",
-    tabPanel("Navbar 1",
-             sidebarPanel(
-               selectInput("fileType", "Select",
+    "Statistics",
+    tabPanel(icon = icon("fas fa-bars"),"Dashboard",
+             div(id="SidebarpanelD",sidebarPanel(
+               selectInput("fileType", "Data Source",
                            choices = c("Select" = "Select","Built-IN" = "builtin",
-                                       "Upload" = "upload",
-                                       "URL" = "url",
-                                       "YAHOO!" = "yahoo")
+                                       "Uplofad" = "upload",
+                                       "URL" = "url")
                ),
                conditionalPanel(
                  condition = "input.fileType == 'builtin'",
-                 selectInput(inputId = "builtIn", label = "Built In data set", choices = ls("package:datasets")),
+                 selectInput(inputId = "builtIn", label = "Built In data set", choices = ls("package:datasets"),selected = "cars"),
                ),
                # Input: Select a file
                conditionalPanel(
@@ -33,19 +33,6 @@ ui = tagList(
                  condition = "input.fileType == 'url'",
                  textInput(inputId = "urlpath", label = "Enter URL to csv", value="https://people.sc.fsu.edu/~jburkardt/data/csv/cities.csv")
                ),
-               #YAHOO!
-               conditionalPanel(
-                 condition = "input.fileType == 'yahoo'",
-                 textInput(inputId = "ticker", label = "Enter TICKER", value = "GOOGL"),
-                 dateInput(inputId = "fromDate", label = "From", value = Sys.Date(), min = NULL, max = Sys.Date(),
-                           format = "yyyy-mm-dd", startview = "month", weekstart = 0,
-                           language = "en"),
-                 dateInput(inputId = "toDate", label = "To", value = Sys.Date(), min = NULL, max = Sys.Date(),
-                           format = "yyyy-mm-dd", startview = "month", weekstart = 0,
-                           language = "en"),
-                 radioButtons(inputId = "interval", label = "Interval", inline = TRUE,
-                              choices = c("Day" = "1d","Week" = "1wk","Month" = "1mo"), selected = "1mo")
-               ),
                conditionalPanel(
                  condition = "input.fileType == 'upload'",
                  textInput(inputId='separator', label='File Separator',value=",")
@@ -56,14 +43,13 @@ ui = tagList(
                  selectInput(inputId = "columns.2", label = "Select 2nd Column", choices = "")
                ),
                
-               sliderInput("s", "number of simulated data" ,min=1, max=1000, value = 10),
+               sliderInput("s", "Number of simulated data" ,min=1, max=1000, value = 10),
                selectInput("conmodel", "Select Model",
                            choices = c("Normal" = "normal",
                                        "Exponential" = "exponential",
                                        "Uniform" = "uniform",
                                        "Hypothesis" = "hypothesis",
-                                       "Hypothesis 2" = "hypothesis.2",
-                                       "Linear Regression" = "linear"),
+                                       "Hypothesis 2" = "hypothesis.2"),
                            selected = "exponential"
                ),
                conditionalPanel(
@@ -78,26 +64,125 @@ ui = tagList(
                  condition = "input.conmodel == 'hypothesis.2'",
                  radioButtons("alpha.2","Significance Level", choices = c("0.025" = "0.025", "0.05" = "0.05","0.01" = "0.01"), inline=TRUE),
                  radioButtons("alternative.2","Alternative", choices = c("Lower Tailed" = "less", "Upper Tailed" = "greater","Two-tailed" = "two.sided"), inline=TRUE)
-               ),
-               conditionalPanel(
-                 condition = "input.conmodel == 'linear'",
-                 selectInput(inputId = "predictor", label = "Predictor column", choices = ""),
-                 selectInput(inputId = "response", label = "Response Column", choices = ""),
-                 selectInput(inputId = "decide", label = "Decision", choices = "")
                )
-             ),
+             )),
              mainPanel(
-               tabsetPanel(
-                 tabPanel("View", (DT::dataTableOutput('extdata'))),
-                 tabPanel("Prediction",
-                          h1(tableOutput('prob'))
+               actionButton("toggleSidebarD", "Toggle"),
+               h1(),
+               navbarPage("Dashboard",
+                 tabPanel("View", wellPanel(DT::dataTableOutput('extdata')),style="color:#000000"),
+                 tabPanel("Summary",
+                          h1("Summary Statistics",style="color:teal"),
+                          verbatimTextOutput("sum"),
+                          h1("Box Plot",style="color:teal"),
+                          wellPanel(plotOutput("box"))),
+                 tabPanel(title = uiOutput("title_panel"),
+                          h1("Prediction",style="color:teal"),
+                          h1(verbatimTextOutput('prob')),
+                          plotOutput("plotModel")
                  ),
-                 tabPanel("GLM", plotOutput('linear')),
                  tabPanel("Histogram",plotOutput('histogram'))
                )
              )
     ),
-    tabPanel("Navbar 2", "This panel is intentionally left blank"),
-    tabPanel("Navbar 3", "This panel is intentionally left blank")
+    tabPanel(icon = icon("fas fa-chart-line"),"GLM", 
+             sidebarPanel(
+               selectInput("ds", "Data Source :",
+                           c("File" = "file",
+                             "Built-in" = "ib"
+                           )),
+               # Input: Select a files ----
+               conditionalPanel(
+                 condition = "input.ds == 'file'",
+                 fileInput("datafileg", "Choose CSV File",
+                           multiple = FALSE,
+                           accept = c("text/csv",
+                                      "text/comma-separated-values/text/plain",
+                                      ".csv"))
+               ),
+               conditionalPanel(
+                 condition = "input.ds == 'ib'",
+                 selectInput(inputId = "ib", label = "Select a Dataset", choices = ls("package:datasets"))
+               ),
+               
+               selectInput(inputId = "tarvar", label = "Response Variable", choices = ""),
+               
+               selectInput(inputId = "indvar", label = "Independent Variables", multiple = TRUE, choices = ""),
+               
+               sliderInput("ratio", "Partition", min = 1, max = 100, value = 80),
+               
+               uiOutput("Input_Ind"),
+               
+             ),
+             
+             mainPanel(
+               navbarPage("GLM",
+                           tabPanel("View", DT::dataTableOutput("glmextdata")),
+                           tabPanel("Plot", h1("Scatterplot",style="color:teal"), plotOutput("simplePlot")),
+                           tabPanel("Graphs", plotOutput("glmperf")),
+                           tabPanel("RMSE", DT::dataTableOutput("RMSE")),
+                           tabPanel("Predcited", DT::dataTableOutput("Prediction"))
+               )
+             )
+    ),
+    tabPanel("YAHOO!", icon = icon("fas fa-yahoo"),
+             div(id="Sidebar",sidebarPanel(
+               textInput(inputId = "ticker", label = "Enter TICKER", value = "GOOGL"),
+               dateInput(inputId = "fromDate", label = "From", value = Sys.Date() - 90, min = NULL, max = Sys.Date(),
+                         format = "yyyy-mm-dd", startview = "month", weekstart = 0,
+                         language = "en"),
+               dateInput(inputId = "toDate", label = "To", value = Sys.Date(), min = NULL, max = Sys.Date(),
+                         format = "yyyy-mm-dd", startview = "month", weekstart = 0,
+                         language = "en"),
+               radioButtons(inputId = "interval", label = "Interval", inline = TRUE,
+                            choices = c("Day" = "1d","Week" = "1wk","Month" = "1mo"), selected = "1d")
+             )),
+             mainPanel(actionButton("toggleSidebar", "Toggle sidebar"),
+               h1("Live Finance Data",style="color:teal"),
+               tabPanel("View", wellPanel((DT::dataTableOutput('yahooData'))),
+                        wellPanel(plotOutput("yahooLine")))
+             )
+    ),
+    tabPanel("About Us",icon = icon("fas fa-users"),
+             mainPanel(
+               tabPanel("ABOUT US", 
+                        fluidPage(
+                          fluidRow(
+                            column(12,
+                                   tableOutput('aboutUs')
+                            )
+                          )
+                        )
+                        
+               )
+             )
+    )
+  ),tags$style(type = 'text/css', '.navbar {
+                           font-family: Lucida Console;
+                           font-size: 15px;
+                           font-weight: bold}'
+               
+  ),tags$style(type = 'text/css', 'h1 {
+                           font-family: Lucida Console;
+                           font-size: 20px;
+                           color: #FF0000;
+                           font-weight: bold}'
+               
+  ),tags$style(type = 'text/css', '.navbar .navbar-default {
+                           background-color: #4979;}'
+           
+  ),tags$style(type = 'text/css', '#toggleSidebarD {
+                           background-color: #4979;}' 
+               
+  ),tags$style(type = 'text/css', '#toggleSidebar{
+                           background-color: #4979;}'
+  ),tags$style(type = 'text/css', '.navbar{
+               background-color: #4979;}'
+  ),tags$style(type = 'text/css', 'body .navbar-default .navbar-nav li a{
+               color: #fff;font-size: 17px;}'
+  ),tags$style(type = 'text/css', 'body .navbar-default .navbar-brand{
+               color: #fff;}'
   )
 )
+
+
